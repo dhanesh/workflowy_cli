@@ -50,4 +50,4 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/rust-lang/audit@v1
+      - uses: actions-rust-lang/audit@v1

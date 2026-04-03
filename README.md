@@ -23,10 +23,24 @@ workflowy-cli nodes list --parent inbox
 
 ## Installation
 
+### One-liner (recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/dhanesh/workflowy_cli/main/install.sh | bash
+```
+
+Or with a custom install directory:
+
+```bash
+INSTALL_DIR=~/.local/bin curl -fsSL https://raw.githubusercontent.com/dhanesh/workflowy_cli/main/install.sh | bash
+```
+
+### From source
+
 Requires [Rust](https://rustup.rs/) 1.70+.
 
 ```bash
-git clone <repo-url> && cd workflowy_cli
+git clone https://github.com/dhanesh/workflowy_cli.git && cd workflowy_cli
 make build
 make install   # copies to /usr/local/bin/
 ```
