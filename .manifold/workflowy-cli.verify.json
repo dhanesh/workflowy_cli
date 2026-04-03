@@ -1,0 +1,117 @@
+{
+  "verification": {
+    "timestamp": "2026-04-04T00:05:00Z",
+    "result": "SATISFIED",
+    "phase": "VERIFIED",
+    "compilation": "PASS",
+    "tests": {"total": 52, "passed": 52, "failed": 0, "duration_ms": 10},
+    "evidence": {"total": 35, "verified": 35, "failed": 0, "pending": 0},
+    "matrix": [
+      {"constraint": "B1", "type": "INVARIANT", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "B2", "type": "GOAL", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "B3", "type": "INVARIANT", "code": true, "test": null, "docs": null, "ops": null, "status": "SATISFIED"},
+      {"constraint": "T1", "type": "INVARIANT", "code": true, "test": true, "docs": null, "ops": null, "status": "SATISFIED"},
+      {"constraint": "T2", "type": "INVARIANT", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "T3", "type": "BOUNDARY", "code": true, "test": true, "docs": null, "ops": null, "status": "SATISFIED"},
+      {"constraint": "T4", "type": "INVARIANT", "code": true, "test": null, "docs": null, "ops": true, "status": "SATISFIED"},
+      {"constraint": "T5", "type": "BOUNDARY", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "T6", "type": "INVARIANT", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "T7", "type": "GOAL", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "U1", "type": "INVARIANT", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "U2", "type": "INVARIANT", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "U3", "type": "INVARIANT", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "U4", "type": "INVARIANT", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "U5", "type": "GOAL", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "S1", "type": "INVARIANT", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "S2", "type": "INVARIANT", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "S3", "type": "BOUNDARY", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "S4", "type": "INVARIANT", "code": true, "test": true, "docs": null, "ops": null, "status": "SATISFIED"},
+      {"constraint": "O1", "type": "INVARIANT", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "O2", "type": "INVARIANT", "code": true, "test": null, "docs": null, "ops": true, "status": "SATISFIED"},
+      {"constraint": "O3", "type": "INVARIANT", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"},
+      {"constraint": "O4", "type": "INVARIANT", "code": true, "test": true, "docs": true, "ops": null, "status": "SATISFIED"}
+    ],
+    "coverage": {
+      "invariants": {"satisfied": 16, "total": 16, "percentage": 100},
+      "goals": {"satisfied": 4, "total": 4, "percentage": 100},
+      "boundaries": {"satisfied": 3, "total": 3, "percentage": 100}
+    },
+    "by_artifact": {
+      "code": {"covered": 23, "total": 23, "percentage": 100},
+      "test": {"covered": 20, "total": 20, "percentage": 100},
+      "docs": {"covered": 17, "total": 17, "percentage": 100},
+      "ops": {"covered": 2, "total": 2, "percentage": 100}
+    },
+    "evidence_verification": {
+      "RT-1": [
+        {"id": "E1-1", "type": "file_exists", "path": "src/config.rs", "status": "VERIFIED", "detail": "6417 bytes"},
+        {"id": "E1-2", "type": "content_match", "path": "src/config.rs", "pattern": "WORKFLOWY_API_KEY", "status": "VERIFIED", "matches": 7},
+        {"id": "E1-3", "type": "content_match", "path": "src/config.rs", "pattern": "config.toml", "status": "VERIFIED", "matches": 3},
+        {"id": "E1-4", "type": "test_passes", "test_name": "load_api_key_prefers_env_var", "status": "VERIFIED"},
+        {"id": "E1-5", "type": "test_passes", "test_name": "cli_has_no_api_key_flag", "status": "VERIFIED"},
+        {"id": "E1-6", "type": "test_passes", "test_name": "config_file_parses_toml", "status": "VERIFIED"}
+      ],
+      "RT-2": [
+        {"id": "E2-1", "type": "file_exists", "path": "src/cli.rs", "status": "VERIFIED", "detail": "8116 bytes"},
+        {"id": "E2-2", "type": "file_exists", "path": "src/api/nodes.rs", "status": "VERIFIED", "detail": "2979 bytes"},
+        {"id": "E2-3", "type": "file_exists", "path": "src/api/targets.rs", "status": "VERIFIED", "detail": "413 bytes"},
+        {"id": "E2-4", "type": "test_passes", "test_name": "all_ten_subcommands_parse", "status": "VERIFIED"},
+        {"id": "E2-5", "type": "test_passes", "test_name": "parse_nodes_list", "status": "VERIFIED"}
+      ],
+      "RT-3": [
+        {"id": "E3-1", "type": "file_exists", "path": "src/output.rs", "status": "VERIFIED", "detail": "3762 bytes"},
+        {"id": "E3-2", "type": "test_passes", "test_name": "node_output_has_shortened_keys", "status": "VERIFIED"},
+        {"id": "E3-3", "type": "test_passes", "test_name": "node_output_omits_none_fields", "status": "VERIFIED"},
+        {"id": "E3-4", "type": "test_passes", "test_name": "filter_fields_selects_specified_keys", "status": "VERIFIED"},
+        {"id": "E3-5", "type": "test_passes", "test_name": "filter_fields_applies_to_array_elements", "status": "VERIFIED"}
+      ],
+      "RT-4": [
+        {"id": "E4-1", "type": "file_exists", "path": "src/prime.rs", "status": "VERIFIED", "detail": "9974 bytes"},
+        {"id": "E4-2", "type": "test_passes", "test_name": "compact_manifest_within_token_budget", "status": "VERIFIED"},
+        {"id": "E4-3", "type": "test_passes", "test_name": "full_manifest_lists_all_commands", "status": "VERIFIED"},
+        {"id": "E4-4", "type": "test_passes", "test_name": "compact_manifest_smaller_than_full", "status": "VERIFIED"}
+      ],
+      "RT-5": [
+        {"id": "E5-1", "type": "file_exists", "path": "src/error.rs", "status": "VERIFIED", "detail": "5368 bytes"},
+        {"id": "E5-2", "type": "test_passes", "test_name": "user_error_exit_code_is_1", "status": "VERIFIED"},
+        {"id": "E5-3", "type": "test_passes", "test_name": "api_error_exit_code_is_2", "status": "VERIFIED"},
+        {"id": "E5-4", "type": "test_passes", "test_name": "auth_error_exit_code_is_3", "status": "VERIFIED"},
+        {"id": "E5-5", "type": "test_passes", "test_name": "error_output_has_required_json_fields", "status": "VERIFIED"}
+      ],
+      "RT-6": [
+        {"id": "E6-1", "type": "file_exists", "path": "src/api/mod.rs", "status": "VERIFIED", "detail": "5617 bytes"},
+        {"id": "E6-2", "type": "test_passes", "test_name": "export_backoff_base_is_60s", "status": "VERIFIED"},
+        {"id": "E6-3", "type": "test_passes", "test_name": "non_export_backoff_base_is_2s", "status": "VERIFIED"},
+        {"id": "E6-4", "type": "test_passes", "test_name": "backoff_is_exponential", "status": "VERIFIED"},
+        {"id": "E6-5", "type": "test_passes", "test_name": "export_backoff_always_above_rate_limit", "status": "VERIFIED"}
+      ],
+      "RT-7": [
+        {"id": "E7-1", "type": "content_match", "path": "src/config.rs", "pattern": "is_terminal", "status": "VERIFIED", "matches": 1},
+        {"id": "E7-2", "type": "content_match", "path": "src/config.rs", "pattern": "from_mode(0o600)", "status": "VERIFIED", "matches": 1}
+      ],
+      "RT-8": [
+        {"id": "E8-1", "type": "file_exists", "path": "Makefile", "status": "VERIFIED", "detail": "397 bytes"},
+        {"id": "E8-2", "type": "content_match", "path": "Makefile", "pattern": "update-api-docs", "status": "VERIFIED", "matches": 2},
+        {"id": "E8-3", "type": "content_match", "path": "Makefile", "pattern": "r.jina.ai", "status": "VERIFIED", "matches": 1}
+      ]
+    },
+    "gaps": [],
+    "enhancement_checks": {
+      "genealogy": {
+        "assumption_invariants": [],
+        "regulation_constraints_traded_off": false
+      },
+      "binding_constraint": {
+        "rt_id": "RT-2",
+        "status": "ADDRESSED",
+        "evidence_verified": true
+      },
+      "propagation": {
+        "violated_effects": false
+      },
+      "statistical": {
+        "T5": "tested via approx_token_count — appropriate for statistical threshold"
+      }
+    }
+  }
+}

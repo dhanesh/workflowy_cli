@@ -1,0 +1,353 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dhanesh/manifold/main/install/manifold-structure.schema.json",
+  "schema_version": 3,
+  "feature": "workflowy-cli",
+  "phase": "VERIFIED",
+  "domain": "software",
+  "created": "2026-04-04T00:00:00Z",
+  "constraints": {
+    "business": [
+      {"id": "B1", "type": "invariant", "source": "interview", "challenger": "stakeholder"},
+      {"id": "B2", "type": "goal", "source": "interview", "challenger": "stakeholder"},
+      {"id": "B3", "type": "invariant", "source": "interview", "challenger": "technical-reality"}
+    ],
+    "technical": [
+      {"id": "T1", "type": "invariant", "source": "interview", "challenger": "stakeholder"},
+      {"id": "T2", "type": "invariant", "source": "interview", "challenger": "stakeholder"},
+      {"id": "T3", "type": "boundary", "source": "interview", "challenger": "technical-reality", "threshold": {"kind": "deterministic", "ceiling": "1 req/min"}},
+      {"id": "T4", "type": "invariant", "source": "interview", "challenger": "stakeholder"},
+      {"id": "T5", "type": "boundary", "source": "interview", "challenger": "stakeholder", "threshold": {"kind": "statistical", "p95": "400 tokens"}},
+      {"id": "T6", "type": "invariant", "source": "interview", "challenger": "stakeholder"},
+      {"id": "T7", "type": "goal", "source": "pre-mortem", "challenger": "assumption"}
+    ],
+    "user_experience": [
+      {"id": "U1", "type": "invariant", "source": "interview", "challenger": "stakeholder"},
+      {"id": "U2", "type": "invariant", "source": "interview", "challenger": "stakeholder"},
+      {"id": "U3", "type": "invariant", "source": "interview", "challenger": "stakeholder"},
+      {"id": "U4", "type": "invariant", "source": "interview", "challenger": "stakeholder"},
+      {"id": "U5", "type": "goal", "source": "interview", "challenger": "stakeholder"}
+    ],
+    "security": [
+      {"id": "S1", "type": "invariant", "source": "interview", "challenger": "regulation"},
+      {"id": "S2", "type": "invariant", "source": "interview", "challenger": "technical-reality"},
+      {"id": "S3", "type": "boundary", "source": "interview", "challenger": "technical-reality"},
+      {"id": "S4", "type": "invariant", "source": "interview", "challenger": "regulation"}
+    ],
+    "operational": [
+      {"id": "O1", "type": "invariant", "source": "interview", "challenger": "technical-reality"},
+      {"id": "O2", "type": "invariant", "source": "interview", "challenger": "stakeholder"},
+      {"id": "O3", "type": "invariant", "source": "interview", "challenger": "technical-reality"},
+      {"id": "O4", "type": "invariant", "source": "interview", "challenger": "technical-reality"}
+    ]
+  },
+  "tensions": [
+    {
+      "id": "TN1",
+      "type": "trade_off",
+      "between": ["U1", "T5"],
+      "status": "resolved",
+      "decision": "A",
+      "validation_criteria": [
+        "prime output is valid JSON and ≤400 tokens",
+        "prime --full output contains all commands with args and descriptions"
+      ],
+      "propagation_effects": [
+        {"constraint_id": "T5", "effect": "LOOSENED", "note": "Compact tier fits budget easily"}
+      ]
+    },
+    {
+      "id": "TN2",
+      "type": "hidden_dependency",
+      "between": ["T2", "O4"],
+      "status": "resolved",
+      "decision": "Shorten at output layer only",
+      "validation_criteria": [
+        "Serde deserialization uses #[serde(default)] for all optional fields",
+        "Unknown API response fields are ignored, not rejected"
+      ],
+      "propagation_effects": [
+        {"constraint_id": "O4", "effect": "LOOSENED", "note": "Permissive deserialization handles schema drift"}
+      ]
+    },
+    {
+      "id": "TN3",
+      "type": "resource_tension",
+      "between": ["U5", "S1", "B2"],
+      "status": "resolved",
+      "decision": "A",
+      "validation_criteria": [
+        "setup reads from interactive TTY prompt when stdin is a terminal",
+        "setup reads from stdin pipe when not a terminal",
+        "API key never appears in process arguments (ps aux clean)"
+      ],
+      "propagation_effects": [
+        {"constraint_id": "B2", "effect": "LOOSENED", "note": "Agents skip setup, use env var directly"}
+      ]
+    },
+    {
+      "id": "TN4",
+      "type": "trade_off",
+      "between": ["T7", "T6"],
+      "status": "resolved",
+      "decision": "A",
+      "validation_criteria": [
+        "--fields flag filters output columns without changing data structure",
+        "Output without --fields matches raw API response structure"
+      ],
+      "propagation_effects": [
+        {"constraint_id": "T6", "effect": "TIGHTENED", "note": "T6 redefined: structural passthrough (no tree), column projection allowed"}
+      ]
+    },
+    {
+      "id": "TN5",
+      "type": "hidden_dependency",
+      "between": ["O1", "T3"],
+      "status": "resolved",
+      "decision": "Command-specific backoff",
+      "validation_criteria": [
+        "Export command uses ≥60s base backoff on 429",
+        "Non-export commands use 2s base backoff on 429"
+      ],
+      "propagation_effects": []
+    }
+  ],
+  "anchors": {
+    "required_truths": [
+      {"id": "RT-1", "status": "PARTIAL", "maps_to": ["S1", "S2", "S3", "B1"], "depth": 0, "children": [
+        {"id": "RT-1.1", "status": "SATISFIED", "depth": 1, "children": []},
+        {"id": "RT-1.2", "status": "SATISFIED", "depth": 1, "children": []}
+      ], "evidence": [
+        {"id": "E1-1", "type": "file_exists", "path": "src/config.rs", "status": "PENDING"},
+        {"id": "E1-2", "type": "content_match", "path": "src/config.rs", "pattern": "WORKFLOWY_API_KEY", "status": "PENDING"},
+        {"id": "E1-3", "type": "content_match", "path": "src/config.rs", "pattern": "config.toml", "status": "PENDING"},
+        {"id": "E1-4", "type": "test_passes", "path": "src/config.rs", "test_name": "load_api_key_prefers_env_var", "status": "PENDING"},
+        {"id": "E1-5", "type": "test_passes", "path": "src/config.rs", "test_name": "cli_has_no_api_key_flag", "status": "PENDING"},
+        {"id": "E1-6", "type": "test_passes", "path": "src/config.rs", "test_name": "config_file_parses_toml", "status": "PENDING"}
+      ]},
+      {"id": "RT-2", "status": "PARTIAL", "maps_to": ["B1", "U2", "T1"], "depth": 0, "children": [
+        {"id": "RT-2.1", "status": "SATISFIED", "depth": 1, "children": []},
+        {"id": "RT-2.2", "status": "SATISFIED", "depth": 1, "children": []}
+      ], "evidence": [
+        {"id": "E2-1", "type": "file_exists", "path": "src/cli.rs", "status": "PENDING"},
+        {"id": "E2-2", "type": "file_exists", "path": "src/api/nodes.rs", "status": "PENDING"},
+        {"id": "E2-3", "type": "file_exists", "path": "src/api/targets.rs", "status": "PENDING"},
+        {"id": "E2-4", "type": "test_passes", "path": "src/cli.rs", "test_name": "all_ten_subcommands_parse", "status": "PENDING"},
+        {"id": "E2-5", "type": "test_passes", "path": "src/cli.rs", "test_name": "parse_nodes_list", "status": "PENDING"}
+      ]},
+      {"id": "RT-3", "status": "PARTIAL", "maps_to": ["T2", "B2", "T7"], "depth": 0, "children": [
+        {"id": "RT-3.1", "status": "SATISFIED", "depth": 1, "children": []},
+        {"id": "RT-3.2", "status": "SATISFIED", "depth": 1, "children": []}
+      ], "evidence": [
+        {"id": "E3-1", "type": "file_exists", "path": "src/output.rs", "status": "PENDING"},
+        {"id": "E3-2", "type": "test_passes", "path": "src/models.rs", "test_name": "node_output_has_shortened_keys", "status": "PENDING"},
+        {"id": "E3-3", "type": "test_passes", "path": "src/models.rs", "test_name": "node_output_omits_none_fields", "status": "PENDING"},
+        {"id": "E3-4", "type": "test_passes", "path": "src/output.rs", "test_name": "filter_fields_selects_specified_keys", "status": "PENDING"},
+        {"id": "E3-5", "type": "test_passes", "path": "src/output.rs", "test_name": "filter_fields_applies_to_array_elements", "status": "PENDING"}
+      ]},
+      {"id": "RT-4", "status": "PARTIAL", "maps_to": ["U1", "T5"], "depth": 0, "children": [
+        {"id": "RT-4.1", "status": "SATISFIED", "depth": 1, "children": []}
+      ], "evidence": [
+        {"id": "E4-1", "type": "file_exists", "path": "src/prime.rs", "status": "PENDING"},
+        {"id": "E4-2", "type": "test_passes", "path": "src/prime.rs", "test_name": "compact_manifest_within_token_budget", "status": "PENDING"},
+        {"id": "E4-3", "type": "test_passes", "path": "src/prime.rs", "test_name": "full_manifest_lists_all_commands", "status": "PENDING"},
+        {"id": "E4-4", "type": "test_passes", "path": "src/prime.rs", "test_name": "compact_manifest_smaller_than_full", "status": "PENDING"}
+      ]},
+      {"id": "RT-5", "status": "PARTIAL", "maps_to": ["U3", "U4", "O3"], "depth": 0, "children": [
+        {"id": "RT-5.1", "status": "SATISFIED", "depth": 1, "children": []},
+        {"id": "RT-5.2", "status": "SATISFIED", "depth": 1, "children": []}
+      ], "evidence": [
+        {"id": "E5-1", "type": "file_exists", "path": "src/error.rs", "status": "PENDING"},
+        {"id": "E5-2", "type": "test_passes", "path": "src/error.rs", "test_name": "user_error_exit_code_is_1", "status": "PENDING"},
+        {"id": "E5-3", "type": "test_passes", "path": "src/error.rs", "test_name": "api_error_exit_code_is_2", "status": "PENDING"},
+        {"id": "E5-4", "type": "test_passes", "path": "src/error.rs", "test_name": "auth_error_exit_code_is_3", "status": "PENDING"},
+        {"id": "E5-5", "type": "test_passes", "path": "src/error.rs", "test_name": "error_output_has_required_json_fields", "status": "PENDING"}
+      ]},
+      {"id": "RT-6", "status": "PARTIAL", "maps_to": ["O1", "T3"], "depth": 0, "children": [
+        {"id": "RT-6.1", "status": "SATISFIED", "depth": 1, "children": []}
+      ], "evidence": [
+        {"id": "E6-1", "type": "file_exists", "path": "src/api/mod.rs", "status": "PENDING"},
+        {"id": "E6-2", "type": "test_passes", "path": "src/api/mod.rs", "test_name": "export_backoff_base_is_60s", "status": "PENDING"},
+        {"id": "E6-3", "type": "test_passes", "path": "src/api/mod.rs", "test_name": "non_export_backoff_base_is_2s", "status": "PENDING"},
+        {"id": "E6-4", "type": "test_passes", "path": "src/api/mod.rs", "test_name": "backoff_is_exponential", "status": "PENDING"},
+        {"id": "E6-5", "type": "test_passes", "path": "src/api/mod.rs", "test_name": "export_backoff_always_above_rate_limit", "status": "PENDING"}
+      ]},
+      {"id": "RT-7", "status": "SATISFIED", "maps_to": ["U5", "S1", "S3"], "depth": 0, "children": [
+        {"id": "RT-7.1", "status": "SATISFIED", "depth": 1, "children": []},
+        {"id": "RT-7.2", "status": "SATISFIED", "depth": 1, "children": []}
+      ], "evidence": [
+        {"id": "E7-1", "type": "content_match", "path": "src/config.rs", "pattern": "is_terminal", "status": "PENDING"},
+        {"id": "E7-2", "type": "content_match", "path": "src/config.rs", "pattern": "from_mode(0o600)", "status": "PENDING"}
+      ]},
+      {"id": "RT-8", "status": "SATISFIED", "maps_to": ["O2", "T4"], "depth": 0, "children": [
+        {"id": "RT-8.1", "status": "SATISFIED", "depth": 1, "children": []}
+      ], "evidence": [
+        {"id": "E8-1", "type": "file_exists", "path": "Makefile", "status": "PENDING"},
+        {"id": "E8-2", "type": "content_match", "path": "Makefile", "pattern": "update-api-docs", "status": "PENDING"},
+        {"id": "E8-3", "type": "content_match", "path": "Makefile", "pattern": "r.jina.ai", "status": "PENDING"}
+      ]}
+    ],
+    "binding_constraint": {
+      "required_truth_id": "RT-2",
+      "reason": "All API endpoints mapped to subcommands is the foundation. RT-3 (output), RT-4 (prime), RT-5 (errors), RT-6 (retry) all depend on the command structure and API types established by RT-2.",
+      "dependency_chain": ["RT-3", "RT-4", "RT-5", "RT-6"]
+    },
+    "recommended_option": "A"
+  },
+  "iterations": [
+    {
+      "number": 1,
+      "phase": "constrain",
+      "timestamp": "2026-04-04T00:00:00Z",
+      "result": "Discovered 20 constraints across 5 categories from interview + pre-mortem",
+      "constraints_added": 20,
+      "by_category": {
+        "business": 3,
+        "technical": 7,
+        "user_experience": 5,
+        "security": 4,
+        "operational": 4
+      }
+    },
+    {
+      "number": 2,
+      "phase": "tension",
+      "timestamp": "2026-04-04T00:01:00Z",
+      "result": "Found 5 tensions (2 trade-offs, 2 hidden dependencies, 1 resource tension), all resolved",
+      "tensions_found": 5,
+      "tensions_resolved": 5,
+      "by_type": {
+        "trade_offs": 2,
+        "resource_tensions": 1,
+        "hidden_dependencies": 2
+      }
+    },
+    {
+      "number": 3,
+      "phase": "anchor",
+      "timestamp": "2026-04-04T00:02:00Z",
+      "result": "Derived 8 required truths with 12 sub-truths. Binding constraint: RT-2. Recommended: Option A (single crate)",
+      "required_truths": 8,
+      "by_status": {
+        "SATISFIED": 0,
+        "PARTIAL": 0,
+        "NOT_SATISFIED": 8,
+        "SPECIFICATION_READY": 0
+      },
+      "solution_options": 3,
+      "selected_option": "A: Single crate with internal modules"
+    },
+    {
+      "number": 4,
+      "phase": "generate",
+      "timestamp": "2026-04-04T00:03:00Z",
+      "result": "Generated 12 artifacts (10 code, 1 build, 1 ops). Clean compilation. All constraints addressed.",
+      "artifacts_generated": 12,
+      "by_type": {
+        "code": 10,
+        "build": 1,
+        "ops": 1
+      }
+    },
+    {
+      "number": 5,
+      "phase": "generate",
+      "timestamp": "2026-04-04T00:04:00Z",
+      "result": "Generated 52 tests across 6 modules to close Gap G1. All pass. Coverage: models (6), output (5), prime (8), error (7), config (6), cli (16), api (6).",
+      "artifacts_generated": 0,
+      "tests_added": 52,
+      "by_module": {
+        "models": 6,
+        "output": 5,
+        "prime": 8,
+        "error": 7,
+        "config": 6,
+        "cli": 16,
+        "api": 6
+      }
+    }
+  ],
+  "generation": {
+    "option": "A",
+    "timestamp": "2026-04-04T00:04:00Z",
+    "artifacts": [
+      {"path": "Cargo.toml", "type": "build", "satisfies": ["T1", "B3"], "status": "generated", "artifact_class": "structural"},
+      {"path": "Makefile", "type": "ops", "satisfies": ["O2", "T4"], "status": "generated", "artifact_class": "substantive"},
+      {"path": "src/main.rs", "type": "code", "satisfies": ["U4"], "status": "generated", "artifact_class": "substantive"},
+      {"path": "src/cli.rs", "type": "code", "satisfies": ["U2", "B1"], "status": "generated", "artifact_class": "substantive"},
+      {"path": "src/models.rs", "type": "code", "satisfies": ["T2", "O4", "T6"], "status": "generated", "artifact_class": "substantive"},
+      {"path": "src/error.rs", "type": "code", "satisfies": ["U3", "U4", "O3"], "status": "generated", "artifact_class": "substantive"},
+      {"path": "src/config.rs", "type": "code", "satisfies": ["S1", "S2", "S3", "U5"], "status": "generated", "artifact_class": "substantive"},
+      {"path": "src/output.rs", "type": "code", "satisfies": ["T2", "T7", "O3"], "status": "generated", "artifact_class": "substantive"},
+      {"path": "src/api/mod.rs", "type": "code", "satisfies": ["O1", "S4", "T3"], "status": "generated", "artifact_class": "substantive"},
+      {"path": "src/api/nodes.rs", "type": "code", "satisfies": ["B1"], "status": "generated", "artifact_class": "substantive"},
+      {"path": "src/api/targets.rs", "type": "code", "satisfies": ["B1"], "status": "generated", "artifact_class": "substantive"},
+      {"path": "src/prime.rs", "type": "code", "satisfies": ["U1", "T5"], "status": "generated", "artifact_class": "substantive"}
+    ],
+    "coverage": {
+      "constraints_addressed": 20,
+      "constraints_total": 20,
+      "percentage": 100
+    }
+  },
+  "convergence": {
+    "status": "CONVERGED"
+  },
+  "constraint_graph": {
+    "version": 1,
+    "nodes": {
+      "B1": {"type": "constraint", "status": "REQUIRED"},
+      "B2": {"type": "constraint", "status": "REQUIRED"},
+      "B3": {"type": "constraint", "status": "REQUIRED"},
+      "T1": {"type": "constraint", "status": "REQUIRED"},
+      "T2": {"type": "constraint", "status": "REQUIRED"},
+      "T3": {"type": "constraint", "status": "REQUIRED"},
+      "T4": {"type": "constraint", "status": "REQUIRED"},
+      "T5": {"type": "constraint", "status": "REQUIRED"},
+      "T6": {"type": "constraint", "status": "REQUIRED"},
+      "T7": {"type": "constraint", "status": "REQUIRED"},
+      "U1": {"type": "constraint", "status": "REQUIRED"},
+      "U2": {"type": "constraint", "status": "REQUIRED"},
+      "U3": {"type": "constraint", "status": "REQUIRED"},
+      "U4": {"type": "constraint", "status": "REQUIRED"},
+      "U5": {"type": "constraint", "status": "REQUIRED"},
+      "S1": {"type": "constraint", "status": "REQUIRED"},
+      "S2": {"type": "constraint", "status": "REQUIRED"},
+      "S3": {"type": "constraint", "status": "REQUIRED"},
+      "S4": {"type": "constraint", "status": "REQUIRED"},
+      "O1": {"type": "constraint", "status": "REQUIRED"},
+      "O2": {"type": "constraint", "status": "REQUIRED"},
+      "O3": {"type": "constraint", "status": "REQUIRED"},
+      "O4": {"type": "constraint", "status": "REQUIRED"},
+      "TN1": {"type": "tension", "status": "SATISFIED"},
+      "TN2": {"type": "tension", "status": "SATISFIED"},
+      "TN3": {"type": "tension", "status": "SATISFIED"},
+      "TN4": {"type": "tension", "status": "SATISFIED"},
+      "TN5": {"type": "tension", "status": "SATISFIED"},
+      "RT-1": {"type": "required_truth", "status": "REQUIRED"},
+      "RT-2": {"type": "required_truth", "status": "REQUIRED"},
+      "RT-3": {"type": "required_truth", "status": "REQUIRED"},
+      "RT-4": {"type": "required_truth", "status": "REQUIRED"},
+      "RT-5": {"type": "required_truth", "status": "REQUIRED"},
+      "RT-6": {"type": "required_truth", "status": "REQUIRED"},
+      "RT-7": {"type": "required_truth", "status": "REQUIRED"},
+      "RT-8": {"type": "required_truth", "status": "REQUIRED"}
+    },
+    "edges": {
+      "dependencies": [
+        {"from": "U1", "to": "T5", "reason": "Prime manifest must fit token budget"},
+        {"from": "T2", "to": "B2", "reason": "Compact JSON is the mechanism for token efficiency"},
+        {"from": "S2", "to": "S1", "reason": "Credential hierarchy enforces no-args-key rule"},
+        {"from": "O1", "to": "T3", "reason": "429 handling enforces rate limit compliance"},
+        {"from": "T2", "to": "O4", "reason": "Key shortening layer depends on permissive deserialization"},
+        {"from": "U5", "to": "S1", "reason": "Setup must receive key without CLI args"},
+        {"from": "T7", "to": "T6", "reason": "Field selection is projection within passthrough constraint"}
+      ],
+      "conflicts": [],
+      "satisfies": [
+        {"from": "TN1", "to": ["U1", "T5"], "resolution": "Two-tier prime"},
+        {"from": "TN3", "to": ["U5", "S1", "B2"], "resolution": "Stdin + TTY detection"},
+        {"from": "TN5", "to": ["O1", "T3"], "resolution": "Command-specific backoff"}
+      ]
+    }
+  }
+}
