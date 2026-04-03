@@ -1,0 +1,1 @@
+{"nodes":[{"id":"aaa-111","name":"Root","note":null,"parent_id":null,"priority":0,"completed":false,"data":{},"createdAt":1700000000,"modifiedAt":1700001000,"completedAt":null},{"id":"bbb-222","name":"Child","note":"detail","parent_id":"aaa-111","priority":1,"completed":true,"data":{"layoutMode":"h1"},"createdAt":1700000100,"modifiedAt":1700001100,"completedAt":1700002000}]}

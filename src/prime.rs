@@ -87,7 +87,8 @@ pub fn compact_manifest() -> String {
         ],
         flags: CompactFlags {
             nodes_list: "--parent <id|target>",
-            nodes_create: "--parent <id|target> --name <text> [--note] [--layout] [--position top|bottom]",
+            nodes_create:
+                "--parent <id|target> --name <text> [--note] [--layout] [--position top|bottom]",
             nodes_get: "<id>",
             nodes_update: "<id> [--name] [--note] [--layout]",
             nodes_delete: "<id>",
@@ -128,25 +129,94 @@ pub fn full_manifest() -> String {
             setup_cmd: "workflowy-cli setup",
         },
         commands: vec![
-            CommandInfo { cmd: "nodes list", desc: "List child nodes of a parent", args: vec!["--parent <id|target>"], method: "GET /api/v1/nodes" },
-            CommandInfo { cmd: "nodes create", desc: "Create a new node", args: vec!["--parent <id|target>", "--name <text>", "--note <text>", "--layout <bullets|todo|h1|h2|h3>", "--position <top|bottom>"], method: "POST /api/v1/nodes" },
-            CommandInfo { cmd: "nodes get", desc: "Retrieve a single node by ID", args: vec!["<id>"], method: "GET /api/v1/nodes/:id" },
-            CommandInfo { cmd: "nodes update", desc: "Update node name, note, or layout", args: vec!["<id>", "--name <text>", "--note <text>", "--layout <mode>"], method: "POST /api/v1/nodes/:id" },
-            CommandInfo { cmd: "nodes delete", desc: "Permanently delete a node", args: vec!["<id>"], method: "DELETE /api/v1/nodes/:id" },
-            CommandInfo { cmd: "nodes move", desc: "Move node to new parent", args: vec!["<id>", "--parent <id|target>", "--position <top|bottom>"], method: "POST /api/v1/nodes/:id/move" },
-            CommandInfo { cmd: "nodes complete", desc: "Mark node as completed", args: vec!["<id>"], method: "POST /api/v1/nodes/:id/complete" },
-            CommandInfo { cmd: "nodes uncomplete", desc: "Mark node as not completed", args: vec!["<id>"], method: "POST /api/v1/nodes/:id/uncomplete" },
-            CommandInfo { cmd: "nodes export", desc: "Export all nodes as flat list (1 req/min limit)", args: vec![], method: "GET /api/v1/nodes-export" },
-            CommandInfo { cmd: "targets list", desc: "List available targets (home, inbox, shortcuts)", args: vec![], method: "GET /api/v1/targets" },
+            CommandInfo {
+                cmd: "nodes list",
+                desc: "List child nodes of a parent",
+                args: vec!["--parent <id|target>"],
+                method: "GET /api/v1/nodes",
+            },
+            CommandInfo {
+                cmd: "nodes create",
+                desc: "Create a new node",
+                args: vec![
+                    "--parent <id|target>",
+                    "--name <text>",
+                    "--note <text>",
+                    "--layout <bullets|todo|h1|h2|h3>",
+                    "--position <top|bottom>",
+                ],
+                method: "POST /api/v1/nodes",
+            },
+            CommandInfo {
+                cmd: "nodes get",
+                desc: "Retrieve a single node by ID",
+                args: vec!["<id>"],
+                method: "GET /api/v1/nodes/:id",
+            },
+            CommandInfo {
+                cmd: "nodes update",
+                desc: "Update node name, note, or layout",
+                args: vec!["<id>", "--name <text>", "--note <text>", "--layout <mode>"],
+                method: "POST /api/v1/nodes/:id",
+            },
+            CommandInfo {
+                cmd: "nodes delete",
+                desc: "Permanently delete a node",
+                args: vec!["<id>"],
+                method: "DELETE /api/v1/nodes/:id",
+            },
+            CommandInfo {
+                cmd: "nodes move",
+                desc: "Move node to new parent",
+                args: vec!["<id>", "--parent <id|target>", "--position <top|bottom>"],
+                method: "POST /api/v1/nodes/:id/move",
+            },
+            CommandInfo {
+                cmd: "nodes complete",
+                desc: "Mark node as completed",
+                args: vec!["<id>"],
+                method: "POST /api/v1/nodes/:id/complete",
+            },
+            CommandInfo {
+                cmd: "nodes uncomplete",
+                desc: "Mark node as not completed",
+                args: vec!["<id>"],
+                method: "POST /api/v1/nodes/:id/uncomplete",
+            },
+            CommandInfo {
+                cmd: "nodes export",
+                desc: "Export all nodes as flat list (1 req/min limit)",
+                args: vec![],
+                method: "GET /api/v1/nodes-export",
+            },
+            CommandInfo {
+                cmd: "targets list",
+                desc: "List available targets (home, inbox, shortcuts)",
+                args: vec![],
+                method: "GET /api/v1/targets",
+            },
         ],
-        global_flags: vec![
-            FlagInfo { flag: "--fields <f1,f2,...>", desc: "Only include specified fields in output (e.g. --fields id,name,priority)" },
-        ],
+        global_flags: vec![FlagInfo {
+            flag: "--fields <f1,f2,...>",
+            desc: "Only include specified fields in output (e.g. --fields id,name,priority)",
+        }],
         exit_codes: vec![
-            ExitCodeInfo { code: 0, meaning: "Success" },
-            ExitCodeInfo { code: 1, meaning: "User/input error (bad args, missing required fields)" },
-            ExitCodeInfo { code: 2, meaning: "API/network error (timeout, server error, rate limit)" },
-            ExitCodeInfo { code: 3, meaning: "Authentication error (missing or invalid API key)" },
+            ExitCodeInfo {
+                code: 0,
+                meaning: "Success",
+            },
+            ExitCodeInfo {
+                code: 1,
+                meaning: "User/input error (bad args, missing required fields)",
+            },
+            ExitCodeInfo {
+                code: 2,
+                meaning: "API/network error (timeout, server error, rate limit)",
+            },
+            ExitCodeInfo {
+                code: 3,
+                meaning: "Authentication error (missing or invalid API key)",
+            },
         ],
         tips: vec![
             "Run 'targets list' first to discover valid parent_id values",
@@ -180,8 +250,8 @@ mod tests {
     #[test]
     fn compact_manifest_is_valid_json() {
         let manifest = compact_manifest();
-        let parsed: serde_json::Value = serde_json::from_str(&manifest)
-            .expect("compact manifest must be valid JSON");
+        let parsed: serde_json::Value =
+            serde_json::from_str(&manifest).expect("compact manifest must be valid JSON");
         assert!(parsed.is_object());
     }
 
@@ -189,8 +259,8 @@ mod tests {
     #[test]
     fn full_manifest_is_valid_json() {
         let manifest = full_manifest();
-        let parsed: serde_json::Value = serde_json::from_str(&manifest)
-            .expect("full manifest must be valid JSON");
+        let parsed: serde_json::Value =
+            serde_json::from_str(&manifest).expect("full manifest must be valid JSON");
         assert!(parsed.is_object());
     }
 
@@ -199,9 +269,16 @@ mod tests {
     fn full_manifest_lists_all_commands() {
         let manifest = full_manifest();
         let expected_commands = [
-            "nodes list", "nodes create", "nodes get", "nodes update",
-            "nodes delete", "nodes move", "nodes complete", "nodes uncomplete",
-            "nodes export", "targets list",
+            "nodes list",
+            "nodes create",
+            "nodes get",
+            "nodes update",
+            "nodes delete",
+            "nodes move",
+            "nodes complete",
+            "nodes uncomplete",
+            "nodes export",
+            "targets list",
         ];
         for cmd in &expected_commands {
             assert!(

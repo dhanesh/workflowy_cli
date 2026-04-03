@@ -132,11 +132,14 @@ mod tests {
             CliError::Api("x".into()),
             CliError::Auth("x".into()),
         ];
-        let categories: Vec<&str> = errors.iter().map(|e| match e {
-            CliError::User(_) => "user_error",
-            CliError::Api(_) => "api_error",
-            CliError::Auth(_) => "auth_error",
-        }).collect();
+        let categories: Vec<&str> = errors
+            .iter()
+            .map(|e| match e {
+                CliError::User(_) => "user_error",
+                CliError::Api(_) => "api_error",
+                CliError::Auth(_) => "auth_error",
+            })
+            .collect();
         // All distinct
         let mut unique = categories.clone();
         unique.sort();
@@ -159,6 +162,9 @@ mod tests {
         // Simulate a reqwest-like error message
         let err = CliError::Api("Connection refused: https://workflowy.com/api/v1/nodes".into());
         let display = format!("{}", err);
-        assert!(!display.contains("Bearer"), "error should not contain auth token");
+        assert!(
+            !display.contains("Bearer"),
+            "error should not contain auth token"
+        );
     }
 }

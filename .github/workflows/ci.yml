@@ -1,0 +1,53 @@
+# Satisfies: RT-5 (CI pipeline), O1 (push + PR triggers), O2 (fmt + clippy + test + audit)
+# Satisfies: O3 (test hard-fail, audit soft-fail), S1 (audit advisory not blocker)
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: Check & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      # O2: fmt check (hard fail)
+      - name: Check formatting
+        run: cargo fmt --check
+
+      # O2: clippy (hard fail)
+      - name: Clippy lints
+        run: cargo clippy -- -D warnings
+
+      # O2: tests (hard fail) — includes unit + integration tests
+      - name: Run tests
+        run: cargo test
+
+  audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    # S1: audit is advisory — does not block CI
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/rust-lang/audit@v1

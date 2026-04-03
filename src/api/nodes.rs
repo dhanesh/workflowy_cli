@@ -8,10 +8,8 @@ impl Client {
     /// GET /api/v1/nodes?parent_id=<id>
     pub fn list_nodes(&self, parent_id: &str) -> Result<Vec<Node>, CliError> {
         let parent = parent_id.to_string();
-        let resp = self.execute_with_retry(
-            |c| c.get("/nodes").query(&[("parent_id", &parent)]),
-            false,
-        )?;
+        let resp =
+            self.execute_with_retry(|c| c.get("/nodes").query(&[("parent_id", &parent)]), false)?;
         let body: NodesListResponse = resp.json()?;
         Ok(body.nodes)
     }

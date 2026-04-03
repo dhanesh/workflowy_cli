@@ -124,10 +124,13 @@ fn validate_api_key(_key: &str) -> Result<(), CliError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serial_test::serial;
     use std::env;
 
+    // Satisfies: RT-1.1 — env var tests must be serialized to prevent parallel pollution
     // Validates: S2 — env var takes precedence over config file
     #[test]
+    #[serial]
     fn load_api_key_prefers_env_var() {
         env::set_var("WORKFLOWY_API_KEY", "env-key-12345");
         let result = load_api_key();
@@ -136,12 +139,20 @@ mod tests {
     }
 
     // Validates: S2 — empty env var falls through to config file
+    // Satisfies: RT-1 — fixed: uses temp HOME to avoid real config file on disk
     #[test]
+    #[serial]
     fn load_api_key_ignores_empty_env_var() {
+        let orig_home = env::var("HOME").unwrap();
+        env::set_var(
+            "HOME",
+            env::temp_dir().join("workflowy-cli-test-nonexistent"),
+        );
         env::set_var("WORKFLOWY_API_KEY", "");
         let result = load_api_key();
         env::remove_var("WORKFLOWY_API_KEY");
-        // Should fail since no config file exists in test env
+        env::set_var("HOME", orig_home);
+        // Should fail since no config file exists in temp HOME
         assert!(result.is_err());
     }
 
@@ -151,8 +162,8 @@ mod tests {
         // The Cli struct in cli.rs has no api_key field.
         // This is a structural test: if someone adds --api-key to Cli,
         // they'd need to import it here. This test documents the invariant.
-        use clap::Parser;
         use crate::cli::Cli;
+        use clap::Parser;
 
         // Parse with an unknown --api-key flag — should fail
         let result = Cli::try_parse_from(["workflowy-cli", "--api-key", "secret", "prime"]);

@@ -1,10 +1,12 @@
 mod api;
+mod cache;
 mod cli;
 mod config;
 mod error;
 mod models;
 mod output;
 mod prime;
+mod validation;
 
 use clap::Parser;
 use cli::{Cli, Command, NodesAction, TargetsAction};
@@ -14,13 +16,48 @@ use models::*;
 fn main() {
     let cli = Cli::parse();
 
+    // Satisfies: RT-4 (structured logging), T5 (stderr only), U2 (opt-in verbose)
+    let log_level = if cli.verbose { "debug" } else { "warn" };
+    let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new(log_level));
+    tracing_subscriber::fmt()
+        .with_env_filter(env_filter)
+        .with_writer(std::io::stderr)
+        .with_target(false)
+        .init();
+
+    // Satisfies: Commandment #4 (Observability) — session correlation ID
+    // Every log line within this invocation carries the same session_id,
+    // enabling correlation of logs from a single CLI run.
+    let session_id = generate_session_id();
+    let _session_span = tracing::info_span!("session", id = %session_id).entered();
+    tracing::debug!("session started");
+
     if let Err(e) = run(cli) {
         e.print_and_exit();
     }
 }
 
+/// Generate a short session ID (first 8 chars of a simple hash).
+/// Avoids adding a uuid crate — uses process ID + timestamp for uniqueness.
+fn generate_session_id() -> String {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+    use std::time::SystemTime;
+
+    let mut hasher = DefaultHasher::new();
+    std::process::id().hash(&mut hasher);
+    SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos()
+        .hash(&mut hasher);
+    format!("{:016x}", hasher.finish())
+}
+
 fn run(cli: Cli) -> Result<(), CliError> {
     let fields = cli.fields.as_deref();
+    let no_cache = cli.no_cache;
 
     match cli.command {
         // Prime: no auth needed
@@ -44,7 +81,7 @@ fn run(cli: Cli) -> Result<(), CliError> {
         }
         Command::Targets { action } => {
             let client = api::Client::new(config::load_api_key()?);
-            handle_targets(client, action, fields)
+            handle_targets(client, action, fields, no_cache)
         }
     }
 }
@@ -67,6 +104,10 @@ fn handle_nodes(
             layout,
             position,
         } => {
+            // Satisfies: RT-6, TN3 — warn-only validation for layout/position
+            validation::warn_layout(layout.as_deref());
+            validation::warn_position(position.as_deref());
+
             let params = CreateNodeParams {
                 name,
                 parent_id: Some(parent),
@@ -94,6 +135,8 @@ fn handle_nodes(
                     "At least one of --name, --note, or --layout is required".into(),
                 ));
             }
+            validation::warn_layout(layout.as_deref());
+
             let params = UpdateNodeParams {
                 name,
                 note,
@@ -113,6 +156,8 @@ fn handle_nodes(
             parent,
             position,
         } => {
+            validation::warn_position(position.as_deref());
+
             let params = MoveNodeParams {
                 parent_id: parent,
                 position,
@@ -144,11 +189,25 @@ fn handle_targets(
     client: api::Client,
     action: TargetsAction,
     fields: Option<&str>,
+    no_cache: bool,
 ) -> Result<(), CliError> {
     match action {
         TargetsAction::List => {
+            // Satisfies: RT-8 — try cache first, fall back to API
+            if !no_cache {
+                if let Some(cached) = cache::read_targets_cache()? {
+                    tracing::debug!("serving targets from cache");
+                    return output::print_json(&cached, fields);
+                }
+            }
+
             let targets = client.list_targets()?;
             let out: Vec<TargetOutput> = targets.into_iter().map(TargetOutput::from).collect();
+
+            // Write cache for future use
+            cache::write_targets_cache(&out)?;
+            tracing::debug!("targets cached");
+
             output::print_json(&out, fields)
         }
     }

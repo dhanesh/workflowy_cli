@@ -15,6 +15,16 @@ pub struct Cli {
     /// Filter output to specific fields (comma-separated, e.g. --fields id,name,priority)
     #[arg(long, global = true)]
     pub fields: Option<String>,
+
+    /// Enable verbose logging (debug-level output on stderr)
+    /// Satisfies: RT-4.3, U2 (opt-in verbose mode)
+    #[arg(short, long, global = true)]
+    pub verbose: bool,
+
+    /// Bypass cache and fetch fresh data from API
+    /// Satisfies: RT-8.2, U1 (cache bypass)
+    #[arg(long, global = true)]
+    pub no_cache: bool,
 }
 
 #[derive(Subcommand)]
@@ -129,23 +139,35 @@ mod tests {
     #[test]
     fn parse_nodes_list() {
         let cli = Cli::try_parse_from(["workflowy-cli", "nodes", "list"]).unwrap();
-        assert!(matches!(cli.command, Command::Nodes { action: NodesAction::List { .. } }));
+        assert!(matches!(
+            cli.command,
+            Command::Nodes {
+                action: NodesAction::List { .. }
+            }
+        ));
     }
 
     // Validates: U2 — resource-action pattern: nodes create
     #[test]
     fn parse_nodes_create() {
-        let cli = Cli::try_parse_from([
-            "workflowy-cli", "nodes", "create", "--name", "Test",
-        ]).unwrap();
-        assert!(matches!(cli.command, Command::Nodes { action: NodesAction::Create { .. } }));
+        let cli =
+            Cli::try_parse_from(["workflowy-cli", "nodes", "create", "--name", "Test"]).unwrap();
+        assert!(matches!(
+            cli.command,
+            Command::Nodes {
+                action: NodesAction::Create { .. }
+            }
+        ));
     }
 
     // Validates: U2 — resource-action pattern: nodes get
     #[test]
     fn parse_nodes_get() {
         let cli = Cli::try_parse_from(["workflowy-cli", "nodes", "get", "abc-123"]).unwrap();
-        if let Command::Nodes { action: NodesAction::Get { id } } = cli.command {
+        if let Command::Nodes {
+            action: NodesAction::Get { id },
+        } = cli.command
+        {
             assert_eq!(id, "abc-123");
         } else {
             panic!("expected NodesAction::Get");
@@ -156,49 +178,96 @@ mod tests {
     #[test]
     fn parse_nodes_update() {
         let cli = Cli::try_parse_from([
-            "workflowy-cli", "nodes", "update", "abc-123", "--name", "New Name",
-        ]).unwrap();
-        assert!(matches!(cli.command, Command::Nodes { action: NodesAction::Update { .. } }));
+            "workflowy-cli",
+            "nodes",
+            "update",
+            "abc-123",
+            "--name",
+            "New Name",
+        ])
+        .unwrap();
+        assert!(matches!(
+            cli.command,
+            Command::Nodes {
+                action: NodesAction::Update { .. }
+            }
+        ));
     }
 
     // Validates: U2 — resource-action pattern: nodes delete
     #[test]
     fn parse_nodes_delete() {
         let cli = Cli::try_parse_from(["workflowy-cli", "nodes", "delete", "abc-123"]).unwrap();
-        assert!(matches!(cli.command, Command::Nodes { action: NodesAction::Delete { .. } }));
+        assert!(matches!(
+            cli.command,
+            Command::Nodes {
+                action: NodesAction::Delete { .. }
+            }
+        ));
     }
 
     // Validates: U2 — resource-action pattern: nodes move
     #[test]
     fn parse_nodes_move() {
         let cli = Cli::try_parse_from([
-            "workflowy-cli", "nodes", "move", "abc-123", "--parent", "inbox",
-        ]).unwrap();
-        assert!(matches!(cli.command, Command::Nodes { action: NodesAction::Move { .. } }));
+            "workflowy-cli",
+            "nodes",
+            "move",
+            "abc-123",
+            "--parent",
+            "inbox",
+        ])
+        .unwrap();
+        assert!(matches!(
+            cli.command,
+            Command::Nodes {
+                action: NodesAction::Move { .. }
+            }
+        ));
     }
 
     // Validates: U2 — resource-action pattern: nodes complete/uncomplete
     #[test]
     fn parse_nodes_complete_uncomplete() {
         let cli = Cli::try_parse_from(["workflowy-cli", "nodes", "complete", "abc-123"]).unwrap();
-        assert!(matches!(cli.command, Command::Nodes { action: NodesAction::Complete { .. } }));
+        assert!(matches!(
+            cli.command,
+            Command::Nodes {
+                action: NodesAction::Complete { .. }
+            }
+        ));
 
         let cli = Cli::try_parse_from(["workflowy-cli", "nodes", "uncomplete", "abc-123"]).unwrap();
-        assert!(matches!(cli.command, Command::Nodes { action: NodesAction::Uncomplete { .. } }));
+        assert!(matches!(
+            cli.command,
+            Command::Nodes {
+                action: NodesAction::Uncomplete { .. }
+            }
+        ));
     }
 
     // Validates: U2 — resource-action pattern: nodes export
     #[test]
     fn parse_nodes_export() {
         let cli = Cli::try_parse_from(["workflowy-cli", "nodes", "export"]).unwrap();
-        assert!(matches!(cli.command, Command::Nodes { action: NodesAction::Export }));
+        assert!(matches!(
+            cli.command,
+            Command::Nodes {
+                action: NodesAction::Export
+            }
+        ));
     }
 
     // Validates: B1 — targets list is a valid subcommand
     #[test]
     fn parse_targets_list() {
         let cli = Cli::try_parse_from(["workflowy-cli", "targets", "list"]).unwrap();
-        assert!(matches!(cli.command, Command::Targets { action: TargetsAction::List }));
+        assert!(matches!(
+            cli.command,
+            Command::Targets {
+                action: TargetsAction::List
+            }
+        ));
     }
 
     // Validates: B1 — prime command exists
@@ -225,9 +294,8 @@ mod tests {
     // Validates: T7 — --fields is a global flag
     #[test]
     fn parse_global_fields_flag() {
-        let cli = Cli::try_parse_from([
-            "workflowy-cli", "--fields", "id,name", "nodes", "list",
-        ]).unwrap();
+        let cli =
+            Cli::try_parse_from(["workflowy-cli", "--fields", "id,name", "nodes", "list"]).unwrap();
         assert_eq!(cli.fields.as_deref(), Some("id,name"));
     }
 

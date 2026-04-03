@@ -123,7 +123,7 @@ pub struct ExportNodeOutput {
     pub completed: Option<i64>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct TargetOutput {
     pub key: String,
     #[serde(rename = "type")]
@@ -239,7 +239,8 @@ mod tests {
             "unknownField": "should be ignored",
             "anotherUnknown": 42
         });
-        let node: Node = serde_json::from_value(json).expect("should deserialize with unknown fields");
+        let node: Node =
+            serde_json::from_value(json).expect("should deserialize with unknown fields");
         assert_eq!(node.id, "abc-123");
         assert_eq!(node.name, "Test Node");
     }
@@ -251,7 +252,8 @@ mod tests {
             "id": "abc-123",
             "name": "Minimal Node"
         });
-        let node: Node = serde_json::from_value(json).expect("should deserialize with missing fields");
+        let node: Node =
+            serde_json::from_value(json).expect("should deserialize with missing fields");
         assert_eq!(node.priority, 0);
         assert_eq!(node.created_at, 0);
         assert!(node.data.layout_mode.is_none());
@@ -306,7 +308,9 @@ mod tests {
             name: "Name".into(),
             note: Some("Note".into()),
             priority: 5,
-            data: NodeData { layout_mode: Some("todo".into()) },
+            data: NodeData {
+                layout_mode: Some("todo".into()),
+            },
             created_at: 100,
             modified_at: 200,
             completed_at: Some(300),
@@ -324,14 +328,28 @@ mod tests {
     fn export_output_is_flat_list() {
         let nodes = vec![
             ExportNode {
-                id: "1".into(), name: "A".into(), note: None,
-                parent_id: None, priority: 0, completed: false,
-                data: NodeData::default(), created_at: 0, modified_at: 0, completed_at: None,
+                id: "1".into(),
+                name: "A".into(),
+                note: None,
+                parent_id: None,
+                priority: 0,
+                completed: false,
+                data: NodeData::default(),
+                created_at: 0,
+                modified_at: 0,
+                completed_at: None,
             },
             ExportNode {
-                id: "2".into(), name: "B".into(), note: None,
-                parent_id: Some("1".into()), priority: 1, completed: true,
-                data: NodeData::default(), created_at: 0, modified_at: 0, completed_at: None,
+                id: "2".into(),
+                name: "B".into(),
+                note: None,
+                parent_id: Some("1".into()),
+                priority: 1,
+                completed: true,
+                data: NodeData::default(),
+                created_at: 0,
+                modified_at: 0,
+                completed_at: None,
             },
         ];
         let out: Vec<ExportNodeOutput> = nodes.into_iter().map(ExportNodeOutput::from).collect();
