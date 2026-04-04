@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/dhanesh/workflowy_cli/compare/workflowy-cli-v0.1.1...workflowy-cli-v0.1.2) (2026-04-03)
+
+
+### Bug Fixes
+
+* fix cross-compilation for aarch64 release builds ([57362b8](https://github.com/dhanesh/workflowy_cli/commit/57362b87b76a7ce87146fc17785331c691acaf1b))
+
 ## [0.1.1](https://github.com/dhanesh/workflowy_cli/compare/workflowy-cli-v0.1.0...workflowy-cli-v0.1.1) (2026-04-03)
 
 
